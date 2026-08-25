@@ -1,44 +1,59 @@
-<!-- PORTFOLIO PROJECT PROFILE: maintained by the repository owner -->
+# Sky Shipping Estimator
 
-## Project profile and code-audit snapshot
+A focused Scala 3 engineering product for deterministic parcel-shipping cost estimates.
 
-**What this is:** **Scala-Shipping-Estimator** is a public repository described as: “Enterprise-grade shipping estimator implementation in Scala. #SkyCoin4444 #AI #Blockchain #DevOps #Innovation” Its dominant language signals are **Python (4 files)**.
+## Status
 
-**Why it has value:** Its value is best understood through the implementation evidence currently present in the repository: **18 tracked files** were observed in the shallow audit, with the source structure and existing documentation providing the project’s specific context. This README does not treat a prototype, experiment, or archive as a production system without supporting evidence.
+**Engineering beta.** The estimator has a real Scala implementation, input validation, deterministic money rounding, unit tests, and GitHub Actions compile/test gates. It is not a carrier-rate integration, tax engine, address validator, fulfillment platform, or production pricing authority.
 
-**Implementation evidence:** 2 test-related file(s) detected; 2 dependency or package manifest(s) detected; 2 build/CI/infrastructure signal(s) detected; and 3 documentation or governance file(s) detected. Test filenames observed include `tests/__init__.py`, `tests/test_main.py`. Dependency or package files include `package.json`, `requirements.txt`. Build, CI, or infrastructure signals include `Dockerfile`, `.github/workflows/ci.yml`.
+## Model
 
-**Current status:** The repository is tracked on the `main` branch. The existing source tree, configuration, tests, workflows, and documentation remain authoritative for supported behavior and maturity. A code audit is not a production-readiness certification, and the presence of a test or workflow file does not establish that all checks pass.
+The current quote model uses:
 
-**Relationship to the wider portfolio:** This repository is one focused component of the broader Skyler Blue Spillers portfolio across AI, software engineering, cloud and DevOps, cybersecurity, blockchain, finance, education, social systems, and creative work. It may provide a service boundary, implementation pattern, experiment, archive, or reusable idea for related repositories. Treat repositories as technical dependencies only where documented interfaces and verified project requirements support that relationship.
+- base charge: `4.50`
+- distance charge: `0.035` per kilometer
+- weight charge: `0.80` per kilogram
+- service multiplier: Economy `1.00`, Standard `1.25`, Express `1.75`
 
-**Quality and security note:** No obvious secret-like pattern was detected by the limited static scan; this is not a substitute for a security audit. No TODO/FIXME marker was detected in the scanned text files.
+Currency is intentionally unspecified. Callers must define currency and commercial policy outside this library.
 
----
+## Build and test
 
-# Scala Shipping Estimator
+Requirements: Java 21 and sbt.
 
-![GitHub stars](https://img.shields.io/github/stars/skylerblue333/Scala-Shipping-Estimator?style=flat-square)
-![GitHub license](https://img.shields.io/github/license/skylerblue333/Scala-Shipping-Estimator?style=flat-square)
+```bash
+sbt -batch clean compile
+sbt -batch test
+```
 
-## 🌟 Overview
-**Scala-Shipping-Estimator** is a professional-grade project within the **SkyCoin4444** ecosystem. It focuses on delivering high-value solutions in the domain of **Python**.
+## CLI example
 
-## 🚀 Key Features
-- **Scalable Architecture**: Designed for enterprise-level growth and performance.
-- **Modern Standards**: Implements best practices for clean code and maintainability.
-- **Robust Integration**: Built to work seamlessly within modern cloud-native environments.
+```bash
+sbt 'runMain com.skycoin4444.shipping.ShippingEstimatorCli 10 100 standard'
+```
 
-## 🛠️ Technology Stack
-- **Primary Domain**: Python
-- **Ecosystem**: SkyCoin4444 Digital Platform
+Expected output:
 
-## 📂 Structure
-The project is organized into a modular structure to ensure clarity and ease of development.
+```text
+shipping_total=20.00
+```
 
-## 👨‍💻 Author
-**Skyler Blue Spillers**
-*Professional Chess Player & Software Engineer*
+Invalid weights, negative distances, unknown service levels, and non-numeric CLI values fail explicitly.
 
----
-*Powered by SkyCoin4444*
+## Architecture
+
+`ShippingEstimator` is a pure calculation boundary returning `Either[String, ShippingQuote]`. It has no network calls, persistence, secrets, or external carrier dependency. `ShippingEstimatorCli` is a thin command-line adapter over the library.
+
+This repository previously contained a generic Python anomaly endpoint and npm metadata that did not match the repository name. The productization branch replaces that mismatch with an actual Scala shipping estimator while preserving the original Git history.
+
+## SKYCOIN4444 integration
+
+The library can be wrapped behind a stable API by marketplace, checkout, or fulfillment modules. Production integration should supply currency rules, carrier/service mapping, taxes, insurance, dimensional-weight policy, destination zones, rate versioning, and auditability.
+
+## Security and operational boundaries
+
+The current library does not process credentials or customer data. It does not validate postal addresses or protect callers from commercially invalid pricing assumptions. Treat the built-in coefficients as demonstrative defaults, not real carrier prices.
+
+## License
+
+See `LICENSE`.
